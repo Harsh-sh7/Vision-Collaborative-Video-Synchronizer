@@ -1,0 +1,69 @@
+<mxfile host="65bd71144e">
+    <diagram id="network-topology" name="Network Topology">
+        <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                <!-- Nodes -->
+                <mxCell id="net-host" value="Host Client&#10;(Extension)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="140" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="net-peer" value="Participant Client&#10;(Extension)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="310" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="net-nginx" value="Nginx Ingress / LB&#10;(Port 443 / 80)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="320" y="220" width="140" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="net-backend" value="NestJS Server Instance&#10;(Port 3000)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+                    <mxGeometry x="560" y="220" width="160" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="net-coturn" value="Coturn STUN/TURN&#10;(Port 3478 UDP/TCP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+                    <mxGeometry x="310" y="440" width="160" height="70" as="geometry"/>
+                </mxCell>
+
+                <!-- Connections -->
+                <!-- Host/Peer to Ingress -->
+                <mxCell id="edge-host-nginx" value="HTTPS/WSS" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="net-host" target="net-nginx">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="250 175, 250 238"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-peer-nginx" value="HTTPS/WSS" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="net-peer" target="net-nginx">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="250 345, 250 273"/>
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Ingress to NestJS Backend -->
+                <mxCell id="edge-nginx-back" value="Reverse Proxy&#10;HTTP (Port 3000)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="net-nginx" target="net-backend">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- WebRTC Direct P2P -->
+                <mxCell id="edge-p2p-direct" value="WebRTC Direct P2P (UDP 49152-65535)" style="edgeStyle=straightStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=3;strokeColor=#ff8000;dashed=1;" edge="1" parent="1" source="net-host" target="net-peer">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- Host/Peer to Coturn (Relay Fallback) -->
+                <mxCell id="edge-host-turn" value="STUN/TURN Binding" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="net-host" target="net-coturn">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="25 175, 25 458"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="edge-peer-turn" value="STUN/TURN Binding" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="net-peer" target="net-coturn">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="45 345, 45 493"/>
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Relayed Stream Loop -->
+                <mxCell id="edge-relay-loop" value="WebRTC Relay Fallback" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeWidth=2;strokeColor=#b85450;" edge="1" parent="1" source="net-host" target="net-peer">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="250 175, 250 480, 520 480, 520 345"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

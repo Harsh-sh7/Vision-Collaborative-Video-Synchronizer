@@ -1,0 +1,48 @@
+<mxfile host="65bd71144e">
+    <diagram id="p2p-swarming" name="P2P Swarm &amp; Chunk Sharing">
+        <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                <!-- Nodes (Peers and Server) -->
+                <mxCell id="p2p-host" value="Host Peer&#10;(Has Chunks: [1,2,3,4])" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="340" y="80" width="160" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="p2p-peera" value="Peer A&#10;(Has: [1,2] | Wants: [3,4])" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="120" y="260" width="170" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="p2p-peerb" value="Peer B&#10;(Has: [3] | Wants: [1,2,4])" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="540" y="260" width="170" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="p2p-sig" value="WebSocket Signaling Server&#10;(Coordinates ICE / SDP Handshakes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+                    <mxGeometry x="300" y="440" width="240" height="70" as="geometry"/>
+                </mxCell>
+
+                <!-- Swarm Data Channels (WebRTC) -->
+                <mxCell id="chan-host-a" value="WebRTC Data Channel&#10;(Shares Chunks 3, 4)" style="edgeStyle=straightStyle;rounded=0;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#0080ff;" edge="1" parent="1" source="p2p-host" target="p2p-peera">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="chan-host-b" value="WebRTC Data Channel&#10;(Shares Chunks 1, 2)" style="edgeStyle=straightStyle;rounded=0;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#0080ff;" edge="1" parent="1" source="p2p-host" target="p2p-peerb">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="chan-a-b" value="WebRTC Data Channel&#10;(Peer A sends Chunks 1, 2 to B;&#10;Peer B sends Chunk 3 to A)" style="edgeStyle=straightStyle;rounded=0;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#0080ff;dashed=1;" edge="1" parent="1" source="p2p-peera" target="p2p-peerb">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- Signaling lines (WSS) -->
+                <mxCell id="sig-host" value="SDP Offer/Answer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeColor=#82b366;" edge="1" parent="1" source="p2p-host" target="p2p-sig">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="420 220, 360 220, 360 380, 420 380"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="sig-a" value="ICE Candidates" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeColor=#82b366;" edge="1" parent="1" source="p2p-peera" target="p2p-sig">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="sig-b" value="ICE Candidates" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeColor=#82b366;" edge="1" parent="1" source="p2p-peerb" target="p2p-sig">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

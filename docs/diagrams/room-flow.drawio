@@ -1,0 +1,95 @@
+<mxfile host="65bd71144e">
+    <diagram id="room-lifecycle-state-flow" name="Room Lifecycle State Flow">
+        <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                <!-- States -->
+                <mxCell id="state-created" value="ROOM CREATED&#10;(Empty Room)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="80" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="state-waiting" value="WAITING&#10;(Users joining,&#11;media selected)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="220" y="85" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="state-ready" value="READY&#10;(All peers loaded)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="410" y="85" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="state-playing" value="PLAYING&#10;(Synchronized)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="600" y="85" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="state-paused" value="PAUSED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="600" y="270" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="state-buffering" value="BUFFERING&#10;(Waiting for lagging peer)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+                    <mxGeometry x="410" y="270" width="140" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="state-reconnecting" value="RECONNECTING&#10;(Network disruption)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+                    <mxGeometry x="220" y="270" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="state-ended" value="ROOM ENDED" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="265" width="120" height="80" as="geometry"/>
+                </mxCell>
+
+                <!-- Transitions -->
+                <!-- Created -> Waiting -->
+                <mxCell id="t-create" value="Host gets code" style="edgeStyle=straightStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="state-created" target="state-waiting">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- Waiting -> Ready -->
+                <mxCell id="t-ready" value="All users ready" style="edgeStyle=straightStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="state-waiting" target="state-ready">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- Ready -> Playing -->
+                <mxCell id="t-play" value="Host clicks play" style="edgeStyle=straightStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="state-ready" target="state-playing">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- Playing <-> Paused -->
+                <mxCell id="t-pause" value="Pause triggered" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="state-playing" target="state-paused">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-resume" value="Play triggered" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="state-paused" target="state-playing">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- Playing -> Buffering -->
+                <mxCell id="t-buffer" value="Peer buffers" style="edgeStyle=straightStyle;html=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="state-playing" target="state-buffering">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- Buffering -> Playing -->
+                <mxCell id="t-unbuffer" value="Peer ready" style="edgeStyle=straightStyle;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="state-buffering" target="state-playing">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- Play/Pause/Buffer -> Reconnecting -->
+                <mxCell id="t-recon-p" value="Disconnect" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" edge="1" parent="1" source="state-paused" target="state-reconnecting">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="500 322, 500 370, 285 370"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="t-recon-b" value="Disconnect" style="edgeStyle=straightStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="state-buffering" target="state-reconnecting">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- Reconnecting -> Sync State -->
+                <mxCell id="t-resync" value="Reconnected (Sync State)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="state-reconnecting" target="state-ready">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="285 220, 475 220"/>
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Waiting/Reconnecting -> Ended -->
+                <mxCell id="t-end-wait" value="Room expired" style="edgeStyle=straightStyle;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="state-waiting" target="state-ended">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="t-end-recon" value="Timeout / Leave" style="edgeStyle=straightStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="state-reconnecting" target="state-ended">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

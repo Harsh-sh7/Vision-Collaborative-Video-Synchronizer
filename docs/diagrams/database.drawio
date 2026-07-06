@@ -1,0 +1,46 @@
+<mxfile host="65bd71144e">
+    <diagram id="database-erd" name="Database ERD">
+        <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                <!-- Table: Users -->
+                <mxCell id="tbl-users" value="users&#10;---------------------------------------&#10;+ id: UUID (PK)&#10;  display_name: VARCHAR(50)&#10;  avatar_url: TEXT&#10;  created_at: TIMESTAMP&#10;  updated_at: TIMESTAMP" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="50" y="80" width="220" height="150" as="geometry"/>
+                </mxCell>
+
+                <!-- Table: Rooms -->
+                <mxCell id="tbl-rooms" value="rooms&#10;---------------------------------------&#10;+ id: UUID (PK)&#10;  room_code: VARCHAR(10) (UQ)&#10;  passcode_hash: TEXT (Null)&#10;  host_id: UUID (FK)&#10;  is_locked: BOOLEAN&#10;  collaborative_mode: BOOLEAN&#10;  active_engine: VARCHAR(20)&#10;  active_url: TEXT&#10;  created_at: TIMESTAMP&#10;  expires_at: TIMESTAMP" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="480" y="80" width="240" height="240" as="geometry"/>
+                </mxCell>
+
+                <!-- Table: Room Users (Join Table) -->
+                <mxCell id="tbl-room-users" value="room_users&#10;---------------------------------------&#10;* room_id: UUID (PK, FK)&#10;* user_id: UUID (PK, FK)&#10;  role: VARCHAR(15)&#10;  joined_at: TIMESTAMP" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+                    <mxGeometry x="250" y="420" width="230" height="130" as="geometry"/>
+                </mxCell>
+
+                <!-- Relationship: Users -> Rooms (Host Relation) -->
+                <mxCell id="rel-users-rooms" value="1           Hosts           *" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;sourcePoint=[1,0.5];exitPoint=[0,0.5];exitX=1;exitY=0.33;exitDx=0;exitDy=0;strokeWidth=2;" edge="1" parent="1" source="tbl-users" target="tbl-rooms">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="380 130, 380 200"/>
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Relationship: Users -> Room Users -->
+                <mxCell id="rel-users-roomusers" value="1                       *" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;sourcePoint=[1,0.5];exitPoint=[0.5,1];exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeWidth=2;" edge="1" parent="1" source="tbl-users" target="tbl-room-users">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="160 360, 210 360, 210 485, 250 485"/>
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Relationship: Rooms -> Room Users -->
+                <mxCell id="rel-rooms-roomusers" value="*                       1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeWidth=2;" edge="1" parent="1" source="tbl-rooms" target="tbl-room-users">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="600 380, 520 380, 520 485, 480 485"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

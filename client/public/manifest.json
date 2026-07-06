@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Universal Watch Party",
+  "version": "1.0.0",
+  "description": "Synchronize media playback and collaborate in real-time across YouTube, HTML5 video pages, and more.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "scripting",
+    "notifications"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "index.html"
+  }
+}

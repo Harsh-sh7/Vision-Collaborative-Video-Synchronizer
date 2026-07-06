@@ -1,0 +1,79 @@
+<mxfile host="65bd71144e">
+    <diagram id="message-sequence" name="Message Sequence Flow">
+        <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+
+                <!-- Lifelines -->
+                <mxCell id="life-host" value="Host Client&#10;(Extension)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+                    <mxGeometry x="100" y="80" width="100" height="480" as="geometry"/>
+                </mxCell>
+                <mxCell id="life-server" value="Room Server&#10;(NestJS/WSS)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+                    <mxGeometry x="350" y="80" width="100" height="480" as="geometry"/>
+                </mxCell>
+                <mxCell id="life-peer" value="Participant Client&#10;(Extension)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="600" y="80" width="100" height="480" as="geometry"/>
+                </mxCell>
+
+                <!-- Message 1: Host Joins -->
+                <mxCell id="msg-host-join" value="1. WSS Connection: ROOM_JOIN (token, code)" style="verticalAlign=bottom;endArrow=block;shadow=0;strokeWidth=1;exitX=0.5;exitY=0.15;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="life-host" target="life-server">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="240 152"/>
+                    </mxGeometry>
+                </mxCell>
+                <!-- Message 2: Host Joined Ack -->
+                <mxCell id="msg-host-joined" value="2. ROOM_JOINED (role: 'host')" style="verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;shadow=0;strokeWidth=1;" edge="1" parent="1" source="life-server" target="life-host">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="270 190"/>
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Message 3: Peer Joins -->
+                <mxCell id="msg-peer-join" value="3. WSS Connection: ROOM_JOIN (token, code)" style="verticalAlign=bottom;endArrow=block;shadow=0;strokeWidth=1;" edge="1" parent="1" source="life-peer" target="life-server">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="510 240"/>
+                    </mxGeometry>
+                </mxCell>
+                <!-- Message 4: Peer Joined Ack -->
+                <mxCell id="msg-peer-joined" value="4. ROOM_JOINED (role: 'participant')" style="verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;shadow=0;strokeWidth=1;" edge="1" parent="1" source="life-server" target="life-peer">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="490 275"/>
+                    </mxGeometry>
+                </mxCell>
+                <!-- Message 5: Notify Host -->
+                <mxCell id="msg-notify-join" value="5. USER_PRESENCE_CHANGE (peer: 'Online')" style="verticalAlign=bottom;endArrow=block;shadow=0;strokeWidth=1;" edge="1" parent="1" source="life-server" target="life-host">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="270 310"/>
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Message 6: Host plays video -->
+                <mxCell id="msg-host-play" value="6. MEDIA_STATE_CHANGE (action: 'PLAY', time: 0.0)" style="verticalAlign=bottom;endArrow=block;shadow=0;strokeWidth=1;" edge="1" parent="1" source="life-host" target="life-server">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="250 370"/>
+                    </mxGeometry>
+                </mxCell>
+                <!-- Message 7: Server broadcasts Play -->
+                <mxCell id="msg-server-play" value="7. MEDIA_STATE_CHANGE (action: 'PLAY', time: 0.0)" style="verticalAlign=bottom;endArrow=block;shadow=0;strokeWidth=1;" edge="1" parent="1" source="life-server" target="life-peer">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="500 405"/>
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Message 8: Peer buffers -->
+                <mxCell id="msg-peer-heartbeat" value="8. HEARTBEAT (state: 'Buffering')" style="verticalAlign=bottom;endArrow=block;shadow=0;strokeWidth=1;" edge="1" parent="1" source="life-peer" target="life-server">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="520 460"/>
+                    </mxGeometry>
+                </mxCell>
+                <!-- Message 9: Notify Host -->
+                <mxCell id="msg-notify-buffer" value="9. USER_PRESENCE_CHANGE (peer: 'Buffering')" style="verticalAlign=bottom;endArrow=block;shadow=0;strokeWidth=1;" edge="1" parent="1" source="life-server" target="life-host">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array points="260 495"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
