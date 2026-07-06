@@ -281,7 +281,7 @@ class LocalSyncPlayer {
         this.controlsBar.style.display = 'flex';
         this.pointerShield.style.display = 'block';
 
-        const targetSrc = `http://localhost:3000/youtube-embed?v=${videoId}`;
+        const targetSrc = `https://vision-collaborative-video-synchronizer.onrender.com/youtube-embed?v=${videoId}`;
         if (this.ytIframe.src !== targetSrc) {
           this.ytIframe.src = targetSrc;
         }
@@ -530,7 +530,7 @@ class LocalSyncPlayer {
 
   private setupYoutubeListener() {
     window.addEventListener('message', (event) => {
-      if (!event.origin.includes('localhost:3000') && !event.origin.includes('127.0.0.1')) return;
+      if (!event.origin.includes('localhost:3000') && !event.origin.includes('127.0.0.1') && !event.origin.includes('vision-collaborative-video-synchronizer.onrender.com')) return;
 
       try {
         const data = JSON.parse(event.data);

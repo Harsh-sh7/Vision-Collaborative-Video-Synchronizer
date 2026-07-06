@@ -20,7 +20,7 @@ function App() {
   const [ytLink, setYtLink] = useState('');
 
 
-  const SERVER_URL = 'http://localhost:3000';
+  const SERVER_URL = 'https://vision-collaborative-video-synchronizer.onrender.com';
 
   useEffect(() => {
     // 1. Fetch initial session details from Background Worker

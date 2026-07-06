@@ -13,7 +13,7 @@ let currentRoom: RoomDetails | null = null;
 let currentTabId: number | null = null;
 let playerTabId: number | null = null;
 let myUserId = '';
-const SERVER_URL = 'http://localhost:3000'; // Default backend URL
+const SERVER_URL = 'https://vision-collaborative-video-synchronizer.onrender.com'; // Production backend URL
 
 // Auto-restore session and socket connection on script load/wakeup
 chrome.storage.local.get(['activeRoom', 'userToken', 'displayName'], (res: any) => {
