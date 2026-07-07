@@ -229,11 +229,10 @@ class LocalSyncPlayer {
     if (url.includes('YouTube Video') || url.includes('youtube.com') || url.includes('youtu.be')) return;
 
     const fileName = this.activeRoom.activeUrl.replace('local://', '');
-    const roomId = this.activeRoom.roomId;
 
     this.initDB().then((db) => {
       const transaction = db.transaction('videos_metadata', 'readonly');
-      const request = transaction.objectStore('videos_metadata').get(`${roomId}-${fileName}`);
+      const request = transaction.objectStore('videos_metadata').get(fileName);
       request.onsuccess = () => {
         const metadata = request.result;
         if (metadata) {
@@ -491,7 +490,7 @@ class LocalSyncPlayer {
   }
 
   // Participant chunk rebuilder
-  private async rebuildVideoFromDB(roomId: string, fileName: string): Promise<string> {
+  private async rebuildVideoFromDB(fileName: string): Promise<string> {
     const db = await this.initDB();
     
     const chunks = await new Promise<any[]>((resolve, reject) => {
@@ -500,7 +499,7 @@ class LocalSyncPlayer {
       const request = store.getAll();
       request.onsuccess = () => {
         const all = request.result || [];
-        const filtered = all.filter((c: any) => c.roomId === roomId && c.fileName === fileName);
+        const filtered = all.filter((c: any) => c.fileName === fileName);
         resolve(filtered);
       };
       request.onerror = () => reject(request.error);
@@ -530,7 +529,7 @@ class LocalSyncPlayer {
       this.watchNowBtn.style.display = 'block';
       this.watchNowBtn.onclick = async () => {
         if (this.activeRoom) {
-          const blobUrl = await this.rebuildVideoFromDB(this.activeRoom.roomId, fileName);
+          const blobUrl = await this.rebuildVideoFromDB(fileName);
           this.videoElement.src = blobUrl;
           this.localVideoLoaded = true;
           this.videoElement.style.display = 'block';

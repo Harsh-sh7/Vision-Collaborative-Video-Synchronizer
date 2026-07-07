@@ -70,7 +70,8 @@ function saveChunkAndIncrementMetadata(
       const chunkStore = transaction.objectStore('video_chunks');
       const metaStore = transaction.objectStore('videos_metadata');
 
-      const chunkId = `${roomId}-${fileName}-${chunkIndex}`;
+      // Room-independent chunk key
+      const chunkId = `${fileName}-${chunkIndex}`;
       chunkStore.put({
         id: chunkId,
         roomId,
@@ -80,7 +81,8 @@ function saveChunkAndIncrementMetadata(
         timestamp: Date.now()
       });
 
-      const metaId = `${roomId}-${fileName}`;
+      // Room-independent metadata key
+      const metaId = fileName;
       const metaRequest = metaStore.get(metaId);
 
       metaRequest.onsuccess = () => {
