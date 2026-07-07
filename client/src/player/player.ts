@@ -184,6 +184,24 @@ class LocalSyncPlayer {
     }
   }
 
+  private sendMessagePromise(message: any): Promise<any> {
+    return new Promise((resolve) => {
+      let resolved = false;
+      this.safeSendMessage(message, (response) => {
+        if (!resolved) {
+          resolved = true;
+          resolve(response || { success: true });
+        }
+      });
+      setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          resolve({ success: true, timeout: true });
+        }
+      }, 5000);
+    });
+  }
+
   private setupSession() {
     this.safeSendMessage({ type: 'GET_SESSION' }, (response: any) => {
       if (response) {
@@ -391,36 +409,51 @@ class LocalSyncPlayer {
         payload: { fileName, fileSize }
       });
 
-      // Slice and transmit chunks sequentially with a 40ms throttle (flow control)
+      // Slice and transmit chunks in buckets of 16 to prevent server buffer overload
+      const BUCKET_SIZE = 16;
       for (let i = 0; i < totalChunks; i++) {
         const start = i * CHUNK_SIZE;
         const end = Math.min(file.size, start + CHUNK_SIZE);
         const blobSlice = file.slice(start, end);
 
-        await new Promise<void>((res) => {
+        const chunkAck = await new Promise<any>((res) => {
           const reader = new FileReader();
-          reader.onload = (event) => {
+          reader.onload = async (event) => {
             const buffer = event.target?.result as ArrayBuffer;
             const base64 = this.arrayBufferToBase64(buffer);
 
-            this.safeSendMessage({
-              type: 'SEND_CHUNK',
-              payload: {
-                chunkIndex: i,
-                totalChunks,
-                chunkData: base64,
-                fileName,
-                fileSize
-              }
-            });
-            
-            // Allow 40ms for Socket.io buffers to flush and participants to complete DB write
-            setTimeout(() => {
-              res();
-            }, 40);
+            const payload = {
+              chunkIndex: i,
+              totalChunks,
+              chunkData: base64,
+              fileName,
+              fileSize
+            };
+
+            const isEndOfBucket = (i % BUCKET_SIZE === BUCKET_SIZE - 1) || (i === totalChunks - 1);
+            if (isEndOfBucket) {
+              // Wait for server acknowledgement of the last chunk in the bucket
+              const ack = await this.sendMessagePromise({ type: 'SEND_CHUNK', payload });
+              // 100ms safety pause to let participants save chunks to disk
+              setTimeout(() => {
+                res(ack);
+              }, 100);
+            } else {
+              // Otherwise, send asynchronously
+              this.safeSendMessage({ type: 'SEND_CHUNK', payload });
+              // Tiny 15ms spacing to prevent local IPC queue congestion
+              setTimeout(() => {
+                res({ success: true });
+              }, 15);
+            }
           };
           reader.readAsArrayBuffer(blobSlice);
         });
+
+        if (chunkAck && chunkAck.success === false) {
+          console.warn('Chunk transfer interrupted:', chunkAck.error);
+          break;
+        }
       }
       this.chunkingInProgress = false;
       console.log('Host complete streaming slices!');

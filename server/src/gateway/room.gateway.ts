@@ -275,7 +275,7 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   ) {
     const session = this.socketSessions.get(socket.id);
-    if (!session || session.roomId !== data.roomId) return;
+    if (!session || session.roomId !== data.roomId) return { success: false, error: 'Unauthorized' };
 
     // Relay chunk to all other participants
     socket.to(data.roomId).emit('CHUNK_RECEIVED', {
@@ -285,6 +285,8 @@ export class RoomGateway implements OnGatewayConnection, OnGatewayDisconnect {
       fileName: data.fileName,
       fileSize: data.fileSize,
     });
+
+    return { success: true, chunkIndex: data.chunkIndex };
   }
 
   @SubscribeMessage('PARTICIPANT_READY')
