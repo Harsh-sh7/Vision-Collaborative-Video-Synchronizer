@@ -54,40 +54,66 @@ function initDB(): Promise<IDBDatabase> {
   });
 }
 
-function saveChunkToDB(roomId: string, fileName: string, chunkIndex: number, chunkData: string): Promise<void> {
-  return initDB().then((db) => {
-    return new Promise<void>((resolve, reject) => {
-      const transaction = db.transaction('video_chunks', 'readwrite');
-      const store = transaction.objectStore('video_chunks');
-      const id = `${roomId}-${fileName}-${chunkIndex}`;
-      const request = store.put({ id, roomId, fileName, chunkIndex, chunkData, timestamp: Date.now() });
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
-  });
-}
 
-function getMetadataFromDB(roomId: string, fileName: string): Promise<any> {
-  return initDB().then((db) => {
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction('videos_metadata', 'readonly');
-      const store = transaction.objectStore('videos_metadata');
-      const id = `${roomId}-${fileName}`;
-      const request = store.get(id);
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
-    });
-  });
-}
 
-function saveMetadataToDB(metadata: any): Promise<void> {
+function saveChunkAndIncrementMetadata(
+  roomId: string,
+  fileName: string,
+  chunkIndex: number,
+  chunkData: string,
+  totalChunks: number,
+  fileSize: number
+): Promise<{ progress: number; notifiedReady: boolean }> {
   return initDB().then((db) => {
-    return new Promise<void>((resolve, reject) => {
-      const transaction = db.transaction('videos_metadata', 'readwrite');
-      const store = transaction.objectStore('videos_metadata');
-      const request = store.put(metadata);
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+    return new Promise<{ progress: number; notifiedReady: boolean }>((resolve, reject) => {
+      const transaction = db.transaction(['video_chunks', 'videos_metadata'], 'readwrite');
+      const chunkStore = transaction.objectStore('video_chunks');
+      const metaStore = transaction.objectStore('videos_metadata');
+
+      const chunkId = `${roomId}-${fileName}-${chunkIndex}`;
+      chunkStore.put({
+        id: chunkId,
+        roomId,
+        fileName,
+        chunkIndex,
+        chunkData,
+        timestamp: Date.now()
+      });
+
+      const metaId = `${roomId}-${fileName}`;
+      const metaRequest = metaStore.get(metaId);
+
+      metaRequest.onsuccess = () => {
+        let metadata = metaRequest.result;
+        if (!metadata) {
+          metadata = {
+            id: metaId,
+            roomId,
+            fileName,
+            totalChunks,
+            receivedChunks: 0,
+            size: fileSize,
+            expiry: Date.now() + 4 * 24 * 60 * 60 * 1000,
+            notifiedReady: false
+          };
+        }
+        metadata.receivedChunks++;
+        
+        let shouldNotify = false;
+        const progress = Math.round((metadata.receivedChunks / metadata.totalChunks) * 100);
+        if (progress >= 40 && !metadata.notifiedReady) {
+          metadata.notifiedReady = true;
+          shouldNotify = true;
+        }
+
+        metaStore.put(metadata);
+
+        transaction.oncomplete = () => {
+          resolve({ progress, notifiedReady: shouldNotify });
+        };
+      };
+
+      transaction.onerror = () => reject(transaction.error);
     });
   });
 }
@@ -263,27 +289,15 @@ function initSocket(token: string) {
     if (!currentRoom) return;
     const roomId = currentRoom.roomId;
 
-    // Save chunk to IndexedDB
-    await saveChunkToDB(roomId, payload.fileName, payload.chunkIndex, payload.chunkData);
-
-    // Update metadata
-    let metadata = await getMetadataFromDB(roomId, payload.fileName);
-    if (!metadata) {
-      metadata = {
-        id: `${roomId}-${payload.fileName}`,
-        roomId,
-        fileName: payload.fileName,
-        totalChunks: payload.totalChunks,
-        receivedChunks: 0,
-        size: payload.fileSize,
-        expiry: Date.now() + 4 * 24 * 60 * 60 * 1000, // 4 days auto-delete
-        notifiedReady: false,
-      };
-    }
-    metadata.receivedChunks++;
-    await saveMetadataToDB(metadata);
-
-    const progress = Math.round((metadata.receivedChunks / metadata.totalChunks) * 100);
+    // Use single transaction to save chunk and increment metadata (resolves IndexedDB congestion)
+    const { progress, notifiedReady } = await saveChunkAndIncrementMetadata(
+      roomId,
+      payload.fileName,
+      payload.chunkIndex,
+      payload.chunkData,
+      payload.totalChunks,
+      payload.fileSize
+    );
 
     // Broadcast progress status updates
     broadcastToPopup({
@@ -296,10 +310,7 @@ function initSocket(token: string) {
     });
 
     // Notify user once playable 40% threshold is met
-    if (progress >= 40 && !metadata.notifiedReady) {
-      metadata.notifiedReady = true;
-      await saveMetadataToDB(metadata);
-
+    if (notifiedReady) {
       chrome.notifications.create(
         `ready-${roomId}-${encodeURIComponent(payload.fileName)}`,
         {

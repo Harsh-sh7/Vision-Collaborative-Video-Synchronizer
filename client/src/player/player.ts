@@ -391,7 +391,7 @@ class LocalSyncPlayer {
         payload: { fileName, fileSize }
       });
 
-      // Slice and transmit chunks sequentially
+      // Slice and transmit chunks sequentially with a 40ms throttle (flow control)
       for (let i = 0; i < totalChunks; i++) {
         const start = i * CHUNK_SIZE;
         const end = Math.min(file.size, start + CHUNK_SIZE);
@@ -413,7 +413,11 @@ class LocalSyncPlayer {
                 fileSize
               }
             });
-            res();
+            
+            // Allow 40ms for Socket.io buffers to flush and participants to complete DB write
+            setTimeout(() => {
+              res();
+            }, 40);
           };
           reader.readAsArrayBuffer(blobSlice);
         });
